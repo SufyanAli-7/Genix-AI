@@ -5,7 +5,6 @@ import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 
- 
 import axios from "axios";
 import * as z from "zod";
 import toast from "react-hot-toast";
@@ -57,7 +56,6 @@ const ConversationPage = () => {
       // Add a system message if this is the first message
       const newMessages = messages.length === 0 
         ? [{ role: "system", content: "You are Genix-AI, a smart, helpful, and friendly AI assistant created by Sufyan Ali. Always aim to provide clear, accurate, and respectful answers. Be professional yet approachable. When asked about your name or origin, respond by saying:'I am Genix-AI, an AI assistant created by Sufyan Ali to help you with anything you need.'"
-
          }, userMessage] 
         : [...messages, userMessage];
       
@@ -69,11 +67,16 @@ const ConversationPage = () => {
       setMessages([...newMessages, response.data]);
       
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModel.onOpen();
-      } else{
-        toast.error( "Something went wrong. Please try again.");
+    } catch (error: unknown) { // ✅ Fix 1: Changed from 'any' to 'unknown'
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number } };
+        if (axiosError.response?.status === 403) {
+          proModel.onOpen();
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -164,7 +167,7 @@ const ConversationPage = () => {
               <div className="text-sm overflow-hidden leading-7">
                 <ReactMarkdown
                        components={{
-                      pre: ({ node, ...props }) => (
+                      pre: ({ ...props }) => ( // ✅ Fix 2: Removed unused 'node' parameter
                         <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
                           <pre {...props} />
                         </div>
@@ -176,7 +179,6 @@ const ConversationPage = () => {
                       {message.content || ""}
                   </ReactMarkdown>
               </div>
-                {/* <p className="text-sm">{message.content}</p> */}
               </div>
             ))}
           </div>

@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { useState } from "react";
+import Image from "next/image"; // ✅ Fix 2: Import Next.js Image component
 import { Heading } from "@/components/heading";
 import {
   Select,
@@ -85,11 +86,16 @@ const ImagePage = () => {
       }
 
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModel.onOpen();
-      }else{
-        toast.error( "Something went wrong. Please try again.");
+    } catch (error: unknown) { // ✅ Fix 1: Changed from 'any' to 'unknown'
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number } };
+        if (axiosError.response?.status === 403) {
+          proModel.onOpen();
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();
@@ -132,8 +138,6 @@ const ImagePage = () => {
                 name="amount"
                 render={({ field }) => (
                   <FormItem className="col-span-6 lg:col-span-2">
-                    {" "}
-                    {/* Changed from col-span-12 to col-span-6 */}
                     <Select
                       disabled={isLoading}
                       onValueChange={field.onChange}
@@ -142,8 +146,6 @@ const ImagePage = () => {
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          {" "}
-                          {/* Added w-full to ensure full width */}
                           <SelectValue defaultValue={field.value} />
                         </SelectTrigger>
                       </FormControl>
@@ -163,8 +165,6 @@ const ImagePage = () => {
                 name="resolution"
                 render={({ field }) => (
                   <FormItem className="col-span-6 lg:col-span-2">
-                    {" "}
-                    {/* Changed from col-span-12 to col-span-6 */}
                     <Select
                       disabled={isLoading}
                       onValueChange={field.onChange}
@@ -173,8 +173,6 @@ const ImagePage = () => {
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          {" "}
-                          {/* Added w-full to ensure full width */}
                           <SelectValue defaultValue={field.value} />
                         </SelectTrigger>
                       </FormControl>
@@ -217,19 +215,20 @@ const ImagePage = () => {
                 >
                   {src && (
                     <div className="flex flex-col w-full">
-                      <img
-                        src={src}
-                        alt={`Generated Image ${index + 1}`}
-                        className="w-full aspect-square object-cover"
-                        style={{
-                          display: "block",
-                        }} /* Ensures no whitespace below image */
-                      />
+                      {/* ✅ Fix 2: Replaced <img> with Next.js <Image> component */}
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          src={src}
+                          alt={`Generated Image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                          priority={index < 2} // Prioritize first 2 images for loading
+                        />
+                      </div>
                       <CardFooter className="p-0 mt-0">
-                        {" "}
-                        {/* Removed padding and margin */}
                         <Button
-                          className="w-full rounded-t-none cursor-pointer" /* Removed rounded top corners */
+                          className="w-full rounded-t-none cursor-pointer"
                           variant="secondary"
                           disabled={!src}
                           onClick={() => {

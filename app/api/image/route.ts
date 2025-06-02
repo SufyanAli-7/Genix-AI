@@ -8,6 +8,12 @@ const IMAGEROUTER_API_URL =
 const IMAGEROUTER_API_KEY = process.env.IMAGEROUTER_API_KEY;
 const MODEL = "black-forest-labs/FLUX-1-schnell:free";
 
+// ✅ Fix 2: Define proper type for API responses
+interface ImageApiResponse {
+  data?: unknown[];
+  error?: { message: string };
+}
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -44,23 +50,24 @@ export async function POST(req: Request) {
       return new NextResponse("Free trial has expired.", { status: 403 });
     }
 
-    // Convert resolution options to dimensions if needed
-    let size = resolution;
-    if (
-      resolution === "auto" ||
-      resolution === "low" ||
-      resolution === "medium" ||
-      resolution === "high"
-    ) {
-      // Map quality-based settings to dimensions
-      const sizeMap: Record<string, string> = {
-        auto: "512x512",
-        low: "256x256",
-        medium: "512x512",
-        high: "1024x1024",
-      };
-      size = sizeMap[resolution] || "512x512";
-    }
+    // ✅ Fix 1: Remove unused 'size' variable and its assignment
+    // Convert resolution options to dimensions if needed (for future use)
+    // let size = resolution;
+    // if (
+    //   resolution === "auto" ||
+    //   resolution === "low" ||
+    //   resolution === "medium" ||
+    //   resolution === "high"
+    // ) {
+    //   // Map quality-based settings to dimensions
+    //   const sizeMap: Record<string, string> = {
+    //     auto: "512x512",
+    //     low: "256x256",
+    //     medium: "512x512",
+    //     high: "1024x1024",
+    //   };
+    //   size = sizeMap[resolution] || "512x512";
+    // }
 
     // ImageRouter expects these specific parameters according to the docs
     const requestBody = {
@@ -87,14 +94,14 @@ export async function POST(req: Request) {
 
     // Handle the API limitation by making multiple parallel requests if needed
     const requestCount = parseInt(amount, 10);
-    let allResults: any[] = [];
+    let allResults: unknown[] = []; // ✅ Fix 2: Changed from any[] to unknown[]
 
     // Make multiple API calls in parallel if amount > 1
     if (requestCount > 1) {
       try {
         const requests = Array.from({ length: requestCount }, () =>
           fetch(IMAGEROUTER_API_URL, options)
-            .then((res) => res.json())
+            .then((res) => res.json() as Promise<ImageApiResponse>)
             .catch((err) => {
               console.error("[BATCH_REQUEST_ERROR]", err);
               return null;
@@ -134,7 +141,7 @@ export async function POST(req: Request) {
 
     // If only one image is requested, make a single request
     const response = await fetch(IMAGEROUTER_API_URL, options);
-    const data = await response.json();
+    const data = await response.json() as ImageApiResponse;
 
     console.log("[IMAGE_RESPONSE]", {
       status: response.status,

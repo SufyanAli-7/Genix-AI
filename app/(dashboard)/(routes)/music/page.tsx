@@ -17,8 +17,6 @@ import { Empty } from '@/components/empty';
 import { Loader } from '@/components/loader';
 import { formSchema } from './constants';
 
-
-
 const MusicPage = () => {
   const proModel = useProModal();
   const router = useRouter();
@@ -40,11 +38,16 @@ const MusicPage = () => {
 
       setMusic(response.data.audio);
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModel.onOpen();
-      }else{
-        toast.error( "Something went wrong. Please try again.");
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number } };
+        if (axiosError.response?.status === 403) {
+          proModel.onOpen();
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();

@@ -19,8 +19,7 @@ const AI_TOOLS = [
   },
   {
     title: "🎨Image Generation",
-    subtitle:
-      "Turn Your Imagination Into Art with AI Image Generation.",
+    subtitle: "Turn Your Imagination Into Art with AI Image Generation.",
     description:
       "With Genix-AI's image generation feature, simply type your idea and watch it transform into a vivid visual masterpiece. Powered by cutting-edge text-to-image models, you can create artwork, concept designs, marketing visuals, social media graphics, and more — all tailored to your vision. Customize style, lighting, details, and even moods. No design skills required just your imagination.",
     image: "/testimonials/image generation.png",
@@ -28,8 +27,7 @@ const AI_TOOLS = [
   },
   {
     title: "💻Code Generation",
-    subtitle:
-      "Your AI-Powered Coding Assistant for Faster Development.",
+    subtitle: "Your AI-Powered Coding Assistant for Faster Development.",
     description:
       "Need help with frontend, backend, APIs, or debugging? Genix-AI can write, explain, or optimize code in multiple languages including JavaScript, Python, Java, and more. Whether you’re a beginner learning to code or a senior developer streamlining your workflow, our AI understands your requirements and delivers clean, efficient, and modular code. Accelerate development without sacrificing quality.",
     image: "/testimonials/code generation.jpeg",
@@ -37,8 +35,7 @@ const AI_TOOLS = [
   },
   {
     title: "🎵Music Generation",
-    subtitle:
-      "Create Original Music in Seconds with AI Music Generation.",
+    subtitle: "Create Original Music in Seconds with AI Music Generation.",
     description:
       "Transform text prompts into professionally composed audio tracks. Whether you’re making background music for videos, composing game soundtracks, or just exploring creativity, Genix-AI composes unique music based on your input — from genre and mood to instruments and tempo. Enjoy unlimited royalty-free tracks, perfect for creators, filmmakers, and hobbyists alike.",
     image: "/testimonials/music generation.jpeg",
@@ -65,7 +62,7 @@ export const LandingContent = () => {
           Discover What Genix-AI Can Do
         </h2>{" "}
         <div className="max-w-6xl mx-auto space-y-8">
-          {AI_TOOLS.map((tool, index) => (
+          {AI_TOOLS.map((tool) => (
             <div
               key={tool.title}
               className={`flex ${
@@ -95,9 +92,9 @@ export const LandingContent = () => {
                         {tool.description}
                       </p>
                       <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
-                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2 px-5 rounded-full text-sm transition-all duration-200 transform hover:scale-105 cursor-pointer">
-                        Try It Free!
-                      </Button>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2 px-5 rounded-full text-sm transition-all duration-200 transform hover:scale-105 cursor-pointer">
+                          Try It Free!
+                        </Button>
                       </Link>
                     </div>
                     {/* Image Section */}
@@ -117,7 +114,8 @@ export const LandingContent = () => {
               </Card>
             </div>
           ))}
-        </div>      </div>
+        </div>{" "}
+      </div>
 
       {/* Pricing Section */}
       <div className="mb-20">
@@ -125,7 +123,8 @@ export const LandingContent = () => {
           Friendly Pricing
         </h2>
         <p className="text-center text-gray-400 mb-16">
-         The modern, customer-first approach to acquisition, engagement, and support.
+          The modern, customer-first approach to acquisition, engagement, and
+          support.
         </p>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -134,16 +133,18 @@ export const LandingContent = () => {
             <CardContent className="p-0">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-white mb-2">FREE</h3>
-                <p className="text-gray-400 text-sm">Essential tools for individuals and talents</p>
+                <p className="text-gray-400 text-sm">
+                  Essential tools for individuals and talents
+                </p>
               </div>
-              
               <div className="mb-8">
                 <span className="text-5xl font-bold text-white">$0</span>
                 <span className="text-gray-400 ml-2">forever</span>
-              </div>
-
+              </div>{" "}
               <div className="mb-8">
-                <p className="text-gray-300 font-semibold mb-4">What's included?</p>
+                <p className="text-gray-300 font-semibold mb-4">
+                  What&apos;s included?
+                </p>
                 <ul className="space-y-3">
                   <li className="flex items-center text-gray-300">
                     <span className="text-green-500 mr-3">✦</span>
@@ -167,7 +168,6 @@ export const LandingContent = () => {
                   </li>
                 </ul>
               </div>
-
               <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
                 <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg cursor-pointer">
                   Get Started
@@ -186,16 +186,18 @@ export const LandingContent = () => {
             <CardContent className="p-0">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-white mb-2">PRO</h3>
-                <p className="text-gray-400 text-sm">Perfect for professionals and creators</p>
+                <p className="text-gray-400 text-sm">
+                  Perfect for professionals and creators
+                </p>
               </div>
-              
               <div className="mb-8">
                 <span className="text-5xl font-bold text-white">$20</span>
                 <span className="text-gray-400 ml-2">/per month</span>
-              </div>
-
+              </div>{" "}
               <div className="mb-8">
-                <p className="text-gray-300 font-semibold mb-4">What's included?</p>
+                <p className="text-gray-300 font-semibold mb-4">
+                  What&apos;s included?
+                </p>
                 <ul className="space-y-3">
                   <li className="flex items-center text-white">
                     <span className="text-green-500 mr-3">✦</span>
@@ -219,7 +221,6 @@ export const LandingContent = () => {
                   </li>
                 </ul>
               </div>
-
               <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
                 <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-lg cursor-pointer">
                   Choose Pro
@@ -232,17 +233,21 @@ export const LandingContent = () => {
           <Card className="bg-[#1e2939] border border-[#2a3441] text-white p-8 relative">
             <CardContent className="p-0">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">ENTERPRISE</h3>
-                <p className="text-gray-400 text-sm">For teams and large organizations</p>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  ENTERPRISE
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  For teams and large organizations
+                </p>
               </div>
-              
               <div className="mb-8">
                 <span className="text-5xl font-bold text-white">$79</span>
                 <span className="text-gray-400 ml-2">/per month</span>
-              </div>
-
+              </div>{" "}
               <div className="mb-8">
-                <p className="text-gray-300 font-semibold mb-4">What's included?</p>
+                <p className="text-gray-300 font-semibold mb-4">
+                  What&apos;s included?
+                </p>
                 <ul className="space-y-3">
                   <li className="flex items-center text-white">
                     <span className="text-green-500 mr-3">✦</span>
@@ -266,7 +271,6 @@ export const LandingContent = () => {
                   </li>
                 </ul>
               </div>
-
               <Link href={isSignedIn ? "/dashboard" : "/sign-up"}>
                 <Button className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg cursor-pointer">
                   Contact Sales

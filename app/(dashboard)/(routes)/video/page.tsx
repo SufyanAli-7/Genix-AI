@@ -53,11 +53,16 @@ const VideoPage = () => {
       console.log("Video URL received:", videoUrl);
       setVideo(videoUrl);
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModel.onOpen();
-      }else{
-        toast.error( "Something went wrong. Please try again.");
+    } catch (error: unknown) { // ✅ Fix: Changed from 'any' to 'unknown'
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number } };
+        if (axiosError.response?.status === 403) {
+          proModel.onOpen();
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       router.refresh();

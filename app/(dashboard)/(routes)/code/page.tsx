@@ -64,11 +64,16 @@ const CodePage = () => {
       setMessages([...newMessages, response.data]);
       
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModel.onOpen();
-      }else{
-        toast.error( "Something went wrong. Please try again.");
+    } catch (error: unknown) { // ✅ Fix 1: Changed from 'any' to 'unknown'
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number } };
+        if (axiosError.response?.status === 403) {
+          proModel.onOpen();
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -158,12 +163,12 @@ const CodePage = () => {
                 <div className="text-sm overflow-hidden leading-7">
                   <ReactMarkdown
                     components={{
-                      pre: ({ node, ...props }) => (
+                      pre: ({ ...props }) => ( // ✅ Fix 2: Removed unused 'node' parameter
                         <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
                           <pre {...props} />
                         </div>
                       ),
-                      code: ({ node, ...props }) => (
+                      code: ({ ...props }) => ( // ✅ Fix 3: Removed unused 'node' parameter
                         <code
                           className="bg-black/10 rounded-lg p-1"
                           {...props}

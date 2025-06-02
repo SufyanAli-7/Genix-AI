@@ -10,15 +10,15 @@ export async function POST(req: Request) {
   const signature = (await headers()).get('Stripe-Signature') as string;
 
   let event: Stripe.Event;
-
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (error: any) {
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new NextResponse(`Webhook Error: ${errorMessage}`, { status: 400 });
   }
 
   try {
@@ -44,21 +44,18 @@ export async function POST(req: Request) {
 
       const subscription = await stripe.subscriptions.retrieve(
         session.subscription as string
-      );
-
-      console.log('Retrieved subscription for checkout:', {
+      );      console.log('Retrieved subscription for checkout:', {
         id: subscription.id,
         customer: subscription.customer,
-        current_period_end: (subscription as any).current_period_end, // ✅ Fix: Type assertion
+        current_period_end: (subscription as unknown as { current_period_end: number }).current_period_end,
         status: subscription.status,
       });
 
-      // ✅ Fix: Handle missing current_period_end with fallback using type assertion
-      let currentPeriodEnd = (subscription as any).current_period_end;
-      
-      if (!currentPeriodEnd) {
+      // Handle missing current_period_end with fallback
+      let currentPeriodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;
+        if (!currentPeriodEnd) {
         console.log('Missing current_period_end, using fallback date');
-        // ✅ Create fallback date (30 days from now)
+        // Create fallback date (30 days from now)
         const fallbackDate = new Date();
         fallbackDate.setDate(fallbackDate.getDate() + 30);
         currentPeriodEnd = Math.floor(fallbackDate.getTime() / 1000);
@@ -78,17 +75,15 @@ export async function POST(req: Request) {
     }
 
     if (event.type === 'invoice.payment_succeeded') {
-      const invoice = event.data.object as Stripe.Invoice;
-
-      console.log('Invoice payment succeeded:', {
+      const invoice = event.data.object as Stripe.Invoice;      console.log('Invoice payment succeeded:', {
         id: invoice.id,
-        subscription: (invoice as any).subscription, // ✅ Fix: Type assertion
+        subscription: (invoice as unknown as { subscription: string }).subscription,
         customer: invoice.customer,
         amount_paid: invoice.amount_paid,
       });
 
-      // ✅ Fix: Use type assertion to access subscription property
-      const invoiceSubscription = (invoice as any).subscription;
+      // Use proper type checking for subscription property
+      const invoiceSubscription = (invoice as unknown as { subscription: string }).subscription;
       
       if (!invoiceSubscription || typeof invoiceSubscription !== 'string') {
         console.log('No valid subscription found in invoice, skipping...');
@@ -97,19 +92,16 @@ export async function POST(req: Request) {
 
       const subscription = await stripe.subscriptions.retrieve(
         invoiceSubscription as string
-      );
-
-      console.log('Retrieved subscription for invoice:', {
+      );      console.log('Retrieved subscription for invoice:', {
         id: subscription.id,
-        current_period_end: (subscription as any).current_period_end, // ✅ Fix: Type assertion
+        current_period_end: (subscription as unknown as { current_period_end: number }).current_period_end,
         status: subscription.status,
       });
 
-      // ✅ Fix: Use type assertion for current_period_end
-      const currentPeriodEnd = (subscription as any).current_period_end;
-      if (!currentPeriodEnd) {
+      // Use proper type checking for current_period_end
+      const currentPeriodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;if (!currentPeriodEnd) {
         console.log('Invalid subscription period for invoice, using fallback');
-        // ✅ Use invoice date as fallback
+        // Use invoice date as fallback
         const fallbackDate = new Date();
         fallbackDate.setMonth(fallbackDate.getMonth() + 1); // Add 1 month
 
@@ -138,11 +130,10 @@ export async function POST(req: Request) {
       });
 
       console.log('Successfully updated user subscription');
-    }
-
-    return new NextResponse(null, { status: 200 });
-  } catch (error: any) {
+    }    return new NextResponse(null, { status: 200 });
+  } catch (error: unknown) {
     console.error('[WEBHOOK_ERROR]', error);
-    return new NextResponse(`Internal Error: ${error.message}`, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new NextResponse(`Internal Error: ${errorMessage}`, { status: 500 });
   }
 }

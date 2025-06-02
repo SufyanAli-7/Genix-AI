@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { Zap } from 'lucide-react';
-import { useState } from 'react';
+import toast from "react-hot-toast";
+import axios from "axios";
+import { Zap } from "lucide-react";
+import { useState } from "react";
 
-import { Button } from './ui/button';
+import { Button } from "./ui/button";
 
 interface SubscriptionButtonProps {
   isPro: boolean;
@@ -18,26 +18,25 @@ export const SubscriptionButton = ({
   const onClick = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/stripe');
+      const response = await axios.get("/api/stripe");
 
       window.location.href = response.data.url;
-    } catch (error) {
-      
-      toast.error( "Something went wrong. Please try again.");    
-
+    } catch {
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Button className='cursor-pointer'
-      variant={isPro ? 'default' : 'premium'}
+    <Button
+      className="cursor-pointer"
+      variant={isPro ? "default" : "premium"}
       onClick={onClick}
       disabled={loading}
     >
-      {isPro ? 'Manage Subscription' : 'Upgrade to Pro'}
-      {!isPro && <Zap className="w-4 h-4 ml-2 fill-white"/>}
+      {isPro ? "Manage Subscription" : "Upgrade to Pro"}
+      {!isPro && <Zap className="w-4 h-4 ml-2 fill-white" />}
     </Button>
   );
 };
