@@ -214,9 +214,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🤝 Support
 
-- 📧 Email: support@ai-saas.com
-- 💬 Discord: [Join our community](https://discord.gg/ai-saas)
-- 📚 Documentation: [docs.ai-saas.com](https://docs.ai-saas.com)
+- 📧 Email: msufyan.202105869@gcuf.edu.pk
+- 📚 Documentation: [Coming Soon](https://docs.ai-saas.com)
 
 ## 🙏 Acknowledgments
 
@@ -229,7 +228,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  Made with ❤️ by the AI SaaS Team
+  Made with ❤️ by Sufyan Ali
   
   ⭐ Star us on GitHub if you like this project!
 </div>
