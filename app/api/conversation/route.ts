@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
+import { saveConversation } from "@/lib/conversation";
 
 // Configure OpenAI client with GitHub's endpoint and token
 const client = new OpenAI({
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
 
     // Get request body
     const body = await req.json();
-    const { messages } = body;
+    const { messages, conversationId } = body;
 
     if (!messages) {
       return new NextResponse("Messages are required", { status: 400 });
@@ -39,13 +40,25 @@ export async function POST(req: Request) {
       temperature: 1.0,
       top_p: 1.0,
       model: MODEL,
-    });
+    });    // Get the user message (last message before the assistant response)
+    const userMessage = messages[messages.length - 1];
+    const assistantResponse = response.choices[0].message;
+
+    // Convert to our ChatMessage format
+    const assistantMessage = {
+      role: "assistant" as const,
+      content: assistantResponse.content || "Sorry, I couldn't generate a response."
+    };
+
+    // Save conversation to database
+    const savedConversationId = await saveConversation(userMessage, assistantMessage, conversationId);
 
     if (!isPro) {
       await increaseApiLimit();
-    }
-
-    return NextResponse.json(response.choices[0].message);
+    }    return NextResponse.json({
+      ...assistantMessage,
+      conversationId: savedConversationId
+    });
   } catch (error) {
     console.log("[CONVERSATION_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });

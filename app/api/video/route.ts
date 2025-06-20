@@ -3,6 +3,7 @@ import { fal } from "@fal-ai/client";
 import { auth } from "@clerk/nextjs/server";
 import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
+import { saveVideo } from "@/lib/video-storage";
 
 // Configure FAL AI with API key
 fal.config({
@@ -57,11 +58,21 @@ export async function POST(req: Request) {
     if (result && result.data && result.data.video) {
       const videoUrl = result.data.video.url;
       console.log("Video generated successfully!");
-      console.log("Video URL:", videoUrl);
-
-      // INCREASE API LIMIT AFTER SUCCESSFUL GENERATION
+      console.log("Video URL:", videoUrl);      // INCREASE API LIMIT AFTER SUCCESSFUL GENERATION
       if (!isPro) {
         await increaseApiLimit();
+      }
+
+      // Save video to database
+      try {
+        await saveVideo({
+          prompt,
+          videoUrl
+        });
+        console.log("[DATABASE_VIDEO_SAVED]", videoUrl);
+      } catch (dbError) {
+        console.log("[DATABASE_VIDEO_SAVE_ERROR]", dbError);
+        // Continue even if database save fails
       }
 
       return NextResponse.json([videoUrl]);

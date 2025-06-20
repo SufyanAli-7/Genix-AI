@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
+import { saveCodeGeneration } from "@/lib/code-storage";
 
 
 // Configure OpenAI client with GitHub's endpoint and token
@@ -20,8 +21,7 @@ export async function POST(
     if (!process.env.GITHUB_TOKEN) {
       return new NextResponse("GitHub token not configured", { status: 500 });
     }
-    
-    // Get request body
+      // Get request body
     const body = await req.json();
     const { messages } = body;
     
@@ -31,8 +31,7 @@ export async function POST(
     
         const freeTrial = await checkApiLimit();
         const isPro = await checkSubscription();
-        
-        if (!freeTrial && !isPro) {
+          if (!freeTrial && !isPro) {
           return new NextResponse("Free trial has expired.", { status: 403 });
         }
 
@@ -44,11 +43,30 @@ export async function POST(
       model: MODEL
     });
     
-    if(!isPro){
-        await increaseApiLimit(); 
+    const aiMessage = response.choices[0].message;
+    
+    // INCREASE API LIMIT AFTER SUCCESSFUL GENERATION
+    if (!isPro) {
+      await increaseApiLimit();
     }
-
-    return NextResponse.json(response.choices[0].message);
+    
+    // Save to database
+    const allMessages = [...messages, aiMessage];
+    try {
+      console.log("[CODE_SAVE]", "Saving code generation to database...");
+      const savedCodeGeneration = await saveCodeGeneration(allMessages);
+      console.log("[CODE_SAVE]", "Code generation saved successfully", savedCodeGeneration.id);
+      
+      // Return AI message with codeGenerationId
+      return NextResponse.json({
+        ...aiMessage,
+        codeGenerationId: savedCodeGeneration.id
+      });
+    } catch (saveError) {
+      console.log("[CODE_SAVE_ERROR]", saveError);
+      // Still return the AI message even if save fails
+      return NextResponse.json(aiMessage);
+    }
 
   } catch (error) {
     console.log("[CODE_ERROR]", error);

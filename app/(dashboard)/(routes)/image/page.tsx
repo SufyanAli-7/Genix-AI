@@ -3,13 +3,13 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 import * as z from "zod";
-import { Download, ImageIcon } from "lucide-react";
+import { Download, ImageIcon, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useProModal } from "@/hooks/use-pro-modal";
-import { useState } from "react";
-import Image from "next/image"; // ✅ Fix 2: Import Next.js Image component
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Heading } from "@/components/heading";
 import {
   Select,
@@ -27,11 +27,21 @@ import { Card, CardFooter } from "@/components/ui/card";
 
 import { amountOptions, formSchema, resolutionOptions } from "./constants";
 
+interface SavedImage {
+  id: string;
+  prompt: string;
+  imageUrl: string;
+  amount?: string;
+  resolution?: string;
+  createdAt: string;
+}
+
 const ImagePage = () => {
   const proModel = useProModal();
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
-
+  const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,6 +50,34 @@ const ImagePage = () => {
       resolution: "auto",
     },
   });
+
+  // Load saved images on component mount
+  useEffect(() => {
+    loadSavedImages();
+  }, []);
+  const loadSavedImages = async () => {
+    try {
+      setIsLoadingImages(true);
+      const response = await axios.get('/api/images');
+      setSavedImages(response.data);
+    } catch (error) {
+      console.error('Failed to load saved images:', error);
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  const deleteImage = async (imageId: string) => {
+    try {
+      await axios.delete(`/api/images/${imageId}`);
+      toast.success("Image deleted successfully");
+      // Refresh the saved images list
+      loadSavedImages();
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      toast.error("Failed to delete image");
+    }
+  };
 
   const isLoading = form.formState.isSubmitting;
 
@@ -78,12 +116,14 @@ const ImagePage = () => {
           })
           .filter(Boolean) as string[];
 
-        console.log("Processed nested image URLs:", imageUrls);
-        setImages(imageUrls);
+        console.log("Processed nested image URLs:", imageUrls);        setImages(imageUrls);
       } else {
         console.error("Unexpected response format:", response.data);
         toast.error("Received unexpected data format from API");
       }
+
+      // Refresh saved images after successful generation
+      loadSavedImages();
 
       form.reset();
     } catch (error: unknown) { // ✅ Fix 1: Changed from 'any' to 'unknown'
@@ -195,56 +235,116 @@ const ImagePage = () => {
               </Button>
             </form>
           </Form>
-        </div>
-        <div className="space-y-4 mt-4">
+        </div>        <div className="space-y-4 mt-4">
           {isLoading && (
             <div className="p-20">
               <Loader />
             </div>
           )}
-          {images.length === 0 && !isLoading && (
-            <Empty label="No images generated." />
+          
+          {/* Current Generation Results */}
+          {images.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Latest Generation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {images.map((src, index) => (
+                  <Card
+                    key={`current-${index}-${src}`}
+                    className="rounded-lg overflow-hidden flex flex-col p-0"
+                  >
+                    {src && (
+                      <div className="flex flex-col w-full">
+                        <div className="relative aspect-square w-full">
+                          <Image
+                            src={src}
+                            alt={`Generated Image ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                            priority={index < 2}
+                          />
+                        </div>
+                        <CardFooter className="p-0 mt-0">
+                          <Button
+                            className="w-full rounded-t-none cursor-pointer"
+                            variant="secondary"
+                            disabled={!src}
+                            onClick={() => {
+                              if (src) {
+                                const a = document.createElement("a");
+                                a.href = src;
+                                a.download = `generated-image-${index + 1}.jpg`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                              }
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </CardFooter>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-            {images &&
-              images.length > 0 &&
-              images.map((src, index) => (
-                <Card
-                  key={`image-${index}-${src}`}
-                  className="rounded-lg overflow-hidden flex flex-col p-0"
-                >
-                  {src && (
+
+          {/* Saved Images History */}
+          {isLoadingImages && savedImages.length === 0 && (
+            <div className="p-8">
+              <Loader />
+            </div>
+          )}
+          
+          {savedImages.length > 0 && (            <div>
+              <h3 className="text-lg font-semibold mb-4">Image History</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">                {savedImages.map((savedImage) => (
+                  <Card
+                    key={savedImage.id}
+                    className="rounded-lg overflow-hidden flex flex-col p-0 relative group"
+                  >{/* Delete button - positioned at top-right corner */}
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="absolute top-2 right-2 z-10 w-8 h-8 p-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 bg-violet-600 hover:bg-violet-700"
+                      onClick={() => deleteImage(savedImage.id)}
+                      title="Delete image"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                    
                     <div className="flex flex-col w-full">
-                      {/* ✅ Fix 2: Replaced <img> with Next.js <Image> component */}
                       <div className="relative aspect-square w-full">
                         <Image
-                          src={src}
-                          alt={`Generated Image ${index + 1}`}
+                          src={savedImage.imageUrl}
+                          alt={`Saved Image: ${savedImage.prompt.slice(0, 50)}...`}
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                          priority={index < 2} // Prioritize first 2 images for loading
                         />
+                      </div>
+                      <div className="p-2">
+                        <p className="text-sm text-gray-600 truncate" title={savedImage.prompt}>
+                          {savedImage.prompt}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(savedImage.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                       <CardFooter className="p-0 mt-0">
                         <Button
                           className="w-full rounded-t-none cursor-pointer"
                           variant="secondary"
-                          disabled={!src}
                           onClick={() => {
-                            if (src) {
-                              // Create an anchor element and set the href attribute to the image source
-                              const a = document.createElement("a");
-                              a.href = src;
-                              // Set the download attribute to give the file a name
-                              a.download = `generated-image-${index + 1}.jpg`;
-                              // Append to the document
-                              document.body.appendChild(a);
-                              // Trigger a click
-                              a.click();
-                              // Remove the element
-                              document.body.removeChild(a);
-                            }
+                            const a = document.createElement("a");
+                            a.href = savedImage.imageUrl;
+                            a.download = `image-${savedImage.id}.jpg`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
                           }}
                         >
                           <Download className="h-4 w-4 mr-2" />
@@ -252,10 +352,16 @@ const ImagePage = () => {
                         </Button>
                       </CardFooter>
                     </div>
-                  )}
-                </Card>
-              ))}
-          </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && !isLoadingImages && images.length === 0 && savedImages.length === 0 && (
+            <Empty label="No images generated yet." />
+          )}
         </div>
       </div>
     </div>

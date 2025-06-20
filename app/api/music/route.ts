@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
+import { saveMusic } from "@/lib/music-storage";
 
 const BEATOVEN_API_URL = "https://public-api.beatoven.ai";
 const BEATOVEN_API_KEY = process.env.BEATOVEN_API_KEY;
@@ -105,11 +106,14 @@ export async function POST(req: Request) {
         attempt: attempts + 1,
         status: statusData.status,
         data: statusData,
-      });
-
-      if (statusData.status === "composed") {
+      });      if (statusData.status === "composed") {
         const trackUrl = statusData.meta?.track_url;
         if (trackUrl) {
+          // Save music to database
+          console.log("[MUSIC_SAVE]", "Saving music to database...");
+          await saveMusic(prompt, trackUrl);
+          console.log("[MUSIC_SAVE]", "Music saved successfully");
+          
           // INCREASE API LIMIT AFTER SUCCESSFUL GENERATION
           if (!isPro) {
             await increaseApiLimit();
