@@ -4,7 +4,7 @@ import { deleteVideo } from "@/lib/video-storage";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { videoId: string } }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   try {
     const { userId } = await auth();

@@ -4,7 +4,7 @@ import { deleteImage } from "@/lib/image-storage";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { imageId: string } }
+  { params }: { params: Promise<{ imageId: string }> }
 ) {
   try {
     const { userId } = await auth();

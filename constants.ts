@@ -1,4 +1,4 @@
-export const Max_FREE_COUNTS = 5;
+export const Max_FREE_COUNTS = 12;
 
 
 export const TESTIMONIALS = [
