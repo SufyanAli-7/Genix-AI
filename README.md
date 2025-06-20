@@ -41,15 +41,16 @@
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
 
 ### Backend & Database
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) via [Supabase](https://supabase.com/)
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **Authentication**: [Clerk](https://clerk.com/)
 - **Payments**: [Stripe](https://stripe.com/)
 
 ### AI & External Services
-- **OpenAI**: GPT models for conversation and code generation
-- **Replicate**: AI models for image, music, and video generation
-- **Fal AI**: Additional AI model integrations
+- **Fal AI**: Primary AI model integrations for image and video generation
+- **Beatoven AI**: AI-powered music generation
+- **ImageRouter**: Image processing and generation
+- **GitHub API**: Code-related integrations
 
 ### Development Tools
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -71,34 +72,34 @@ Make sure you have the following installed:
 Create a `.env` file in the root directory:
 
 ```bash
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/ai_saas_db"
-DIRECT_URL="postgresql://username:password@localhost:5432/ai_saas_db"
-
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
 CLERK_SECRET_KEY=sk_test_xxxxx
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/dashboard
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/dashboard
 
-# OpenAI
-OPENAI_API_KEY=sk-xxxxx
+# GitHub Token (for additional integrations)
+GITHUB_TOKEN=ghp_xxxxx
 
-# Replicate
-REPLICATE_API_TOKEN=r8_xxxxx
+# Image Router API
+IMAGEROUTER_API_KEY=xxxxx
+
+# Beatoven AI (Music Generation)
+BEATOVEN_API_KEY=xxxxx
 
 # Fal AI
 FAL_KEY=xxxxx
 
-# Stripe
+# Database (Supabase PostgreSQL)
+DATABASE_URL="postgresql://postgres.username:password@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.username:password@aws-0-ap-south-1.pooler.supabase.com:5432/postgres"
+
+# Stripe Payment Processing
 STRIPE_API_KEY=sk_test_xxxxx
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Crisp Chat
-NEXT_PUBLIC_CRISP_WEBSITE_ID=xxxxx
 ```
 
 ### Installation
@@ -174,17 +175,17 @@ npm run postinstall  # Generate Prisma client
 ## 🌟 Key Features Breakdown
 
 ### AI Conversation
-- Powered by OpenAI's GPT models
+- Powered by Fal AI models
 - Context-aware responses
 - Conversation history storage
 
 ### Image Generation
-- Multiple AI models via Replicate
+- ImageRouter API integration
 - High-quality image output
 - Various style options
 
 ### Music Generation
-- AI-composed original tracks
+- Beatoven AI-composed original tracks
 - Multiple genres supported
 - Download functionality
 
@@ -220,8 +221,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [Vercel](https://vercel.com) for hosting and deployment
-- [OpenAI](https://openai.com) for powerful AI models
-- [Replicate](https://replicate.com) for AI model infrastructure
+- [Supabase](https://supabase.com) for PostgreSQL database hosting
+- [Fal AI](https://fal.ai) for powerful AI model integrations
+- [Beatoven AI](https://beatoven.ai) for music generation capabilities
+- [ImageRouter](https://imagerouter.com) for image processing
 - [Clerk](https://clerk.com) for authentication
 - [Stripe](https://stripe.com) for payment processing
 
